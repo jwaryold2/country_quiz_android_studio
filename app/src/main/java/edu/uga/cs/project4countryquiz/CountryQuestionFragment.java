@@ -131,7 +131,7 @@ public class CountryQuestionFragment extends Fragment {
             List<Integer> used  = new ArrayList<>();
             String[] random_continents = new String[3];
             //correct answer
-            random_continents[2] = country_continents.get(i);
+            random_continents[2] = country_continents.get(B.get(i));
             //first random answer choice
             int randomIndex1= random.nextInt(country_names.size());
             if(!used.contains(randomIndex1) && random.nextInt(country_names.size())!=B.get(i)) {
