@@ -130,20 +130,27 @@ public class CountryQuestionFragment extends Fragment {
         for(int i = 0; i < 6; i++){
             List<Integer> used  = new ArrayList<>();
             String[] random_continents = new String[3];
+            //correct answer
+            random_continents[2] = country_continents.get(i);
             //first random answer choice
             int randomIndex1= random.nextInt(country_names.size());
             if(!used.contains(randomIndex1) && random.nextInt(country_names.size())!=B.get(i)) {
                 random_continents[0] = country_continents.get(random.nextInt(country_names.size()));
+                while (random_continents[0].equals(random_continents[2])) {
+                    random_continents[0] = country_continents.get(random.nextInt(country_names.size()));
+                }
                 used.add(randomIndex1);
             }
             //second random answer choice
             int randomIndex2= random.nextInt(country_names.size());
             if(!used.contains(random.nextInt(country_names.size())) && random.nextInt(country_names.size())!=B.get(i)) {
                 random_continents[1] = country_continents.get(random.nextInt(country_names.size()));
+                while (random_continents[1].equals(random_continents[0]) || random_continents[1].equals(random_continents[2])) {
+                    random_continents[1] = country_continents.get(random.nextInt(country_names.size()));
+                }
                 used.add(randomIndex2);
             }
-            //correct answer
-            random_continents[2] = country_continents.get(i);
+            Log.d("tag", random_continents[2]);
             sixQuestions[i] = new GenerateQuestion(country_names.get(B.get(i)), random_continents, country_continents.get(B.get(i)));
         }
         Log.d("sixQuestions:" , Arrays.toString(sixQuestions));
