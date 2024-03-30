@@ -11,10 +11,14 @@ public class CountryQuizPagerAdapter extends FragmentStateAdapter {
     }
     @Override
     public Fragment createFragment(int position){
-        return CountryQuestionFragment.newInstance(position);
+        if (position < 6) {
+            return CountryQuestionFragment.newInstance(position);
+        } else {
+            return ScoringFragment.newInstance();
+        }
     }
     @Override
     public int getItemCount() {
-        return CountryQuestionFragment.getNumberOfVersions();
+        return CountryQuestionFragment.getNumberOfVersions() + 1;
     }
 }

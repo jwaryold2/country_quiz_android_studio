@@ -29,7 +29,7 @@ import java.util.Set;
 
 
 public class CountryQuestionFragment extends Fragment {
-    int score = 0;
+    static int score = 0;
     int listsize;
     private BackEnd BE;
     @SuppressLint("NewApi")
@@ -177,6 +177,10 @@ public class CountryQuestionFragment extends Fragment {
             }
         });
 
+    }
+
+    public static int getScore() {
+        return score;
     }
 
     public static int getNumberOfVersions() {
