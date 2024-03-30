@@ -1,15 +1,18 @@
 package edu.uga.cs.project4countryquiz;
 
-import android.annotation.SuppressLint;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Random;
 public class GenerateQuestion {
+    //section for second question creation
+    String q2;
     String a1;
     String a2;
     String a3;
+    String ccc;
 
+    //Section for initial question creation
     String q;
     String cA;
     int score;
@@ -19,21 +22,26 @@ public class GenerateQuestion {
     public GenerateQuestion(){
 
     }
-    public GenerateQuestion(String question, String[] possibleAnswers, String correctA){
-            shuffleArray(possibleAnswers);
-            this.q = question;
-            this.a1 = possibleAnswers[0];
-            this.a2 = possibleAnswers[1];
-            this.a3 = possibleAnswers[2];
-            this.cA = correctA;
+
+    public GenerateQuestion(Country c) {
+        this.q = c.name;
+        this.cA = c.continent;
     }
 
+
     //generate Score page
-    public GenerateQuestion(int score, LocalTime lt, LocalDate ld)
+    public GenerateQuestion(String country,  String [] randAnswers, String correct)
     {
-        this.score=score;
-        this.lt=lt;
-        this.ld=ld;
+        String[] aaa = new String[3];
+        aaa[0] = correct;
+        aaa[1] = randAnswers[0];
+        aaa[2] = randAnswers[1];
+        shuffleArray(aaa);
+        this.q2 = country;
+        this.ccc = correct;
+        this.a1 = aaa[0];
+        this.a2 = aaa[1];
+        this.a3 = aaa[2];
     }
     @Override
     public String toString() {

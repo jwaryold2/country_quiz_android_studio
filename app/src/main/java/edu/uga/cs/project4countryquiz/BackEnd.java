@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -15,112 +16,89 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class BackEnd extends SQLiteOpenHelper {
+public class BackEnd {
     private static final String DB_NAME = "countriesQuiz.db";
     private static final int DB_VERSION = 1;
-    private static BackEnd helperInstance;
 
     //table structure
-    private final Context mContext;
-
-    public static final String TABLE_COUNTRIES = "countries";
-    public static final String COUNTRIES_COLUMN_ID = "_id";
-    public static final String COUNTRIES_COLUMN_COUNTRY = "country";
-    public static final String COUNTRIES_COLUMN_CONTINENT = "continent";
+    public static final String DEBUG_TAG = "backend";
 
     //table for quiz results
-
-    private static final String CREATE_COUNTRIES = "create table " + TABLE_COUNTRIES + " ("+
-            COUNTRIES_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "+COUNTRIES_COLUMN_COUNTRY +
-            " TEXT, "+ COUNTRIES_COLUMN_CONTINENT +" TEXT )";
+    private SQLiteDatabase   db;
+    private SQLiteOpenHelper Backendhelper;
+    private static final String[] allColumns = {
+            BackendHelper.COUNTRIES_COLUMN_ID,
+            BackendHelper.COUNTRIES_COLUMN_COUNTRY,
+            BackendHelper.COUNTRIES_COLUMN_CONTINENT
+    };
 
     public BackEnd(Context context) {
-        super(context, DB_NAME, null, DB_VERSION);
-        this.mContext = context;
-        fillDatabaseFromCSV();
+        this.Backendhelper = BackendHelper.getInstance( context );
     }
 
-    public static synchronized BackEnd getInstance (Context context) {
-        if (helperInstance == null) {
-            helperInstance = new BackEnd(context.getApplicationContext());
-
+    //open the database
+    public void open(){
+        db = Backendhelper.getWritableDatabase();
+        Log.d( DEBUG_TAG, "JobLeadsData: db open" );
+    }
+    public void close() {
+        if( Backendhelper != null ) {
+            Backendhelper.close();
+            Log.d(DEBUG_TAG, "JobLeadsData: db closed");
         }
-        return helperInstance;
-    }
-    @Override
-    public void onCreate(SQLiteDatabase db){
-        db.execSQL( CREATE_COUNTRIES );
-    }
-    @Override
-    public void onUpgrade( SQLiteDatabase db, int oldVersion, int newVersion ) {
-        db.execSQL( "drop table if exists " + TABLE_COUNTRIES );
-        onCreate( db );
     }
 
-    public List<Country> getAllCountry() {
-        List<Country> countryList = new ArrayList<>();
-        //select ALL
-        String selectQuery = "SELECT * FROM "+ TABLE_COUNTRIES;
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-        //add rows to list
-        if(cursor.moveToFirst()){
-            do{
-                Country c = new Country(cursor.getString(1), cursor.getString(2));
-                countryList.add(c);
-            }while(cursor.moveToNext());
+    public boolean isDBOpen()
+    {
+        return db.isOpen();
+    }
+
+    //Retrieve all DB entries as a list of strings
+    //For each row we can create a new Country
+    public List<Country> retrieveAllCountries() {
+        ArrayList<Country> countries = new ArrayList<>();
+        Cursor cursor = null;
+        int columnIndex;
+        try{
+            cursor = db.query( BackendHelper.TABLE_COUNTRIES, allColumns, null, null,null,null,null);
+
+            if( cursor!=null && cursor.getCount() > 0) {
+
+                while( cursor.moveToNext() ) {
+
+                    if( cursor.getColumnCount() >= 0){
+
+                        //get all attribute values of country
+                        columnIndex = cursor.getColumnIndex( BackendHelper.COUNTRIES_COLUMN_COUNTRY );
+                        String country = cursor.getString(columnIndex);
+                        columnIndex = cursor.getColumnIndex( BackendHelper.COUNTRIES_COLUMN_CONTINENT );
+                        String continent  = cursor.getString(columnIndex);
+
+                        Country dbc = new Country( country, continent );
+                        countries.add(dbc);
+                       // Log.d(DEBUG_TAG, "Retrieved Country: " + dbc);
+                    }//if
+
+                }//while
+
+            }//if
+            if( cursor != null )
+                Log.d( DEBUG_TAG, "Number of records from DB: " + cursor.getCount() );
+            else
+                Log.d( DEBUG_TAG, "Number of records from DB: 0" );
+        } //try
+        catch( Exception e){
+            Log.d( DEBUG_TAG, "EXCEPTION CAUGHT: "+e);
         }
-        return countryList;
-    }
-
-    public void fillDatabaseFromCSV() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        SQLiteStatement statement = null;
-
-        try {
-            // Construct the SQL INSERT statement
-            String insertStatement = "INSERT INTO " + TABLE_COUNTRIES + " (" +
-                    COUNTRIES_COLUMN_COUNTRY + ", " + COUNTRIES_COLUMN_CONTINENT + ") VALUES (?, ?)";
-
-            // Prepare the statement for insertion
-            statement = db.compileStatement(insertStatement);
-
-            // Begin transaction for bulk insert
-            db.beginTransaction();
-
-            // Read the CSV file and fill the database
-            Resources resources = mContext.getResources();
-            InputStream inputStream = resources.openRawResource(R.raw.country_continent); // Place your CSV file in res/raw
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] data = line.split(","); // Assuming comma-separated values
-
-                // Bind values to the prepared statement
-                statement.bindString(1, data[0]); // Country
-                statement.bindString(2, data[1]); // Continent
-
-                // Execute the statement
-                statement.execute();
-
-                // Reset the statement for the next iteration
-                statement.clearBindings();
+        finally{
+            if(cursor!=null){
+                cursor.close();
             }
-
-            // Commit the transaction
-            db.setTransactionSuccessful();
-        } catch (Exception e) {
-            // Handle exceptions
-        } finally {
-            // End transaction and close resources
-            if (statement != null) {
-                statement.close();
-            }
-            db.endTransaction();
-            db.close();
         }
+        //Log.d(DEBUG_TAG, "COUNTRIES:"+ Arrays.toString(new ArrayList[]{countries}));
+        return countries;
     }
-
 }

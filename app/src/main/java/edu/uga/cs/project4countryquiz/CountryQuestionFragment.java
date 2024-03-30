@@ -24,37 +24,27 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class CountryQuestionFragment extends Fragment {
+    private BackEnd backendData = null;
+    private List<Country> country_list;
+    private List<String[]> continents;
     static int score = 0;
     int listsize;
-    private BackEnd BE;
     @SuppressLint("NewApi")
     LocalDate ld = LocalDate.now();
     @SuppressLint("NewApi")
     LocalTime lt = LocalTime.now();
     // Array of Android version code names
-    private static final String[] androidVersions = {
-            "Germany", "Japan", "USA"
-    };
 
-    public static final GenerateQuestion [] sixQuestions = new GenerateQuestion[6];
+    public static final GenerateQuestion [] sixQuestions = new GenerateQuestion[7];
     // Array of Android version highlights/brief descriptions
-    private static final String[] androidVersionsInfo = {
-            // Germany
-            "France", "Japan", "USA",
-            // Japan
-            "USA", "Germany", "China",
-            // USA
-            "Canada", "Mexico", "Germany"
-    };
 
-    private static final String[] correctAnswers = {
-            "France", "Germany", "Canada"
-    };
 
 
     // which Android version to display in the fragment
@@ -78,7 +68,6 @@ public class CountryQuestionFragment extends Fragment {
         if( getArguments() != null ) {
             versionNum = getArguments().getInt( "versionNum" );
         }
-        BE = BackEnd.getInstance(getContext());
     }
 
     @Override
@@ -89,94 +78,21 @@ public class CountryQuestionFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated( @NonNull View view, Bundle savedInstanceState ) {
-        //public void onActivityCreated(Bundle savedInstanceState) {
-        super.onViewCreated( view, savedInstanceState );
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        TextView titleView = view.findViewById(R.id.textView2);
+        RadioGroup rg = view.findViewById(R.id.radioGroup);
+        RadioButton r1 = view.findViewById(R.id.radioButton);
+        RadioButton r2 = view.findViewById(R.id.radioButton2);
+        RadioButton r3 = view.findViewById(R.id.radioButton3);
 
-        TextView titleView = view.findViewById( R.id.textView2 );
-        RadioGroup rg = view.findViewById( R.id.radioGroup );
-        RadioButton r1 = view.findViewById( R.id.radioButton );
-        RadioButton r2 = view.findViewById( R.id.radioButton2 );
-        RadioButton r3 = view.findViewById( R.id.radioButton3 );
+        country_list = new ArrayList<>();
+        backendData = new BackEnd(getActivity());
+        continents = new ArrayList<String[]>();
 
-        List<Country> Countries_from_db = BE.getAllCountry();
-        //List Filled with all country names
-        List<String> country_names = new ArrayList<>();
-        //List Fill with corresponding country continents
-        List<String> country_continents = new ArrayList<>();
-        for(Country c: Countries_from_db) {
-            country_names.add(c.name);
-            country_continents.add(c.continent);
-            Log.d("List Of Countries", c.name);
-        }
-        //Set of all possible unique answer choices
-        Set<String> answerChoices = new HashSet<>();
-        answerChoices.add(country_continents.toString());
+        backendData.open();
 
-
-        //THIS AND BELOW IS ALL FUCKED UP WITH RANDOM NUMBER ETCS ????
-        Set<Integer> uniqueIndices = new HashSet<>();
-        Random random = new Random();
-        while (uniqueIndices.size() < 6) {
-            int randomIndex = random.nextInt(country_names.size());
-            uniqueIndices.add(randomIndex);
-        }
-        List<Integer> B = new ArrayList<>();
-        for(int i: uniqueIndices){
-            B.add(i);
-        }
-
-
-        for(int i = 0; i < 6; i++){
-            List<Integer> used  = new ArrayList<>();
-            String[] random_continents = new String[3];
-            //correct answer
-            random_continents[2] = country_continents.get(B.get(i));
-            //first random answer choice
-            int randomIndex1= random.nextInt(country_names.size());
-            if(!used.contains(randomIndex1) && random.nextInt(country_names.size())!=B.get(i)) {
-                random_continents[0] = country_continents.get(random.nextInt(country_names.size()));
-                while (random_continents[0].equals(random_continents[2])) {
-                    random_continents[0] = country_continents.get(random.nextInt(country_names.size()));
-                }
-                used.add(randomIndex1);
-            }
-            //second random answer choice
-            int randomIndex2= random.nextInt(country_names.size());
-            if(!used.contains(random.nextInt(country_names.size())) && random.nextInt(country_names.size())!=B.get(i)) {
-                random_continents[1] = country_continents.get(random.nextInt(country_names.size()));
-                while (random_continents[1].equals(random_continents[0]) || random_continents[1].equals(random_continents[2])) {
-                    random_continents[1] = country_continents.get(random.nextInt(country_names.size()));
-                }
-                used.add(randomIndex2);
-            }
-            Log.d("tag", random_continents[2]);
-            sixQuestions[i] = new GenerateQuestion(country_names.get(B.get(i)), random_continents, country_continents.get(B.get(i)));
-        }
-        Log.d("sixQuestions:" , Arrays.toString(sixQuestions));
-
-        titleView.setText(sixQuestions[versionNum].q);
-        r1.setText(sixQuestions[versionNum].a1);
-        r2.setText(sixQuestions[versionNum].a2);
-        r3.setText(sixQuestions[versionNum].a3);
-
-        rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                RadioButton radioButton = view.findViewById(checkedId);
-                if (radioButton != null && radioButton.isChecked()) {
-
-                    String selectedText = radioButton.getText().toString();
-                    if(selectedText == sixQuestions[versionNum].cA) score++;
-                    // Do something with the selected text
-                    Log.d("Selected Radio Button", selectedText);
-                    Log.d("correctA: ", sixQuestions[versionNum].cA);
-                    Log.d("Score:", String.valueOf(score));
-                    Log.d("data:", BE.getAllCountry().toString());
-                }
-            }
-        });
-
+        new BackendReader().execute();
     }
 
     public static int getScore() {
@@ -187,4 +103,76 @@ public class CountryQuestionFragment extends Fragment {
         return sixQuestions.length;
     }
 
+    private class BackendReader extends AsyncTask<Void, List<Country>> {
+        @Override
+        protected List<Country> doInBackground(Void... params) {
+            return backendData.retrieveAllCountries();
+        }
+
+        @Override
+        protected void onPostExecute(List<Country> countries) {
+            country_list.addAll(countries);
+            GenerateQuestion[] Questions = new GenerateQuestion[7];
+            for (int i = 0; i < 6; i++) {
+                Questions[i] = new GenerateQuestion(country_list.get(i));
+                Log.d("QUESTIONS-ARRAY:", "QUESTION ARRAY: "+ Questions[i].q +" "+Questions[i].cA);
+            }
+
+            Random random = new Random();
+
+            for (int i = 0; i < 6; i++) {
+                String a = Questions[i].cA;
+                String[] b = new String[2];
+                for (int j = 0; j < 2; j++) {
+                    int randomIndex;
+                    String continent;
+                    do {
+                        randomIndex = random.nextInt(country_list.size());
+                        continent = country_list.get(randomIndex).continent;
+                    } while (randomIndex == i || continent.equals(b[0])); // Ensure random index is different from current country index and continent is different from previous one
+                    b[j] = continent;
+                }
+                Log.d("QUESTIONS-ARRAY:", "B: " + Arrays.toString(b));
+                continents.add(b);
+            }
+            //Log.d("QUESTIONS-ARRAY:", "continent ARRAY: "+ Arrays.toString(continents.get(1)));
+
+
+            GenerateQuestion[] gq = new GenerateQuestion[7];
+            for(int i = 0; i < 6; i++){
+                gq[i] = new GenerateQuestion(Questions[i].q, continents.get(i), Questions[i].cA);
+                //Log.d("QUESTIONS-ARRAY:", "gq: " + gq[i].q2);
+            }
+
+            View fragmentView = getView();
+            if (fragmentView != null) {
+                TextView titleView = fragmentView.findViewById(R.id.textView2);
+                RadioButton r1 = fragmentView.findViewById(R.id.radioButton);
+                RadioButton r2 = fragmentView.findViewById(R.id.radioButton2);
+                RadioButton r3 = fragmentView.findViewById(R.id.radioButton3);
+
+                //Log.d("TITLE-VIEW", gq[versionNum].q);
+                titleView.setText(gq[versionNum].q2);
+                r1.setText(gq[versionNum].a1);
+                r2.setText(gq[versionNum].a2);
+                r3.setText(gq[versionNum].a3);
+
+                RadioGroup rg = fragmentView.findViewById(R.id.radioGroup);
+                rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(RadioGroup group, int checkedId) {
+                        RadioButton radioButton = fragmentView.findViewById(checkedId);
+                        if (radioButton != null && radioButton.isChecked()) {
+                            String selectedText = radioButton.getText().toString();
+                            if (selectedText.equals(gq[versionNum].ccc)) {
+                                score+=2;
+                            }else{
+                                score+=1;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    }
 }

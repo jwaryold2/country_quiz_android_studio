@@ -18,7 +18,5 @@ public class CountryQuizChildActivity extends AppCompatActivity {
         pager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
         pager.setAdapter(cqpAdapter);
 
-        BackEnd dbHelper = new BackEnd(this);
-        dbHelper.getWritableDatabase();
     }
 }

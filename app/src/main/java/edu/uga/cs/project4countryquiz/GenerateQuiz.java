@@ -1,32 +1,55 @@
 package edu.uga.cs.project4countryquiz;
 
+import static java.security.AccessController.getContext;
+
 import android.annotation.SuppressLint;
+import android.util.Log;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 public class GenerateQuiz {
 
-    GenerateQuestion q1;
-    GenerateQuestion q2;
-    GenerateQuestion q3;
-    GenerateQuestion q4;
-    GenerateQuestion q5;
-    GenerateQuestion q0;
+    String q;
+    String a1;
+    String a2;
+    String a3;
+    String ccc;
+    String cA;
 
-    //answer holders
-    int answered_question = 0;
     public GenerateQuiz() {
 
     }
-    public GenerateQuiz(GenerateQuestion[] questions) {
-        this.q0 = questions[0];
-        this.q1 = questions[1];
-        this.q2 = questions[2];
-
-        //this.q3 = questions[3];
-        //this.q4 = questions[4];
-        //this.q5 = questions[5];
+    public GenerateQuiz(GenerateQuestion[] q_ca, List<String[]> answerChoices)
+    {
+        for(int i = 0; i < q_ca.length; i++){
+            String[] answer = new String[3];
+            for(int j= 0; i < 2; j++){
+                answer[j] = answer[j];
+            }
+            answer[2] = q_ca[i].ccc;
+            shuffleArray(answer);
+            this.q = q_ca[i].q;
+            this.a1 = answer[0];
+            this.a2 = answer[1];
+            this.a3 = answer[2];
+            this.ccc = q_ca[i].ccc;
+            Log.d("FILLED: ", "QUESTION: "+q);
+        }
     }
-    //new constructor for partially generated questions;
+    public static void shuffleArray(String[] array) {
+        Random random = new Random();
+        for (int i = array.length - 1; i > 0; i--) {
+            int index = random.nextInt(i + 1);
+            // Swap array[i] with array[index]
+            String temp = array[i];
+            array[i] = array[index];
+            array[index] = temp;
+        }
+    }
 }
