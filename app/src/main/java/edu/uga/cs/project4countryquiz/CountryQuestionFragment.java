@@ -33,8 +33,10 @@ import java.util.stream.Collectors;
 public class CountryQuestionFragment extends Fragment {
     private BackEnd backendData = null;
     private List<Country> country_list;
-    private List<String[]> continents;
+    private String[] continents = {"Asia", "Europe", "North America", "South America", "Africa", "Oceania"};
     static int score = 0;
+    static String[] correctAnswers = new String[6];
+    static String[] selectedAnswers = new String[6];
     int listsize;
     @SuppressLint("NewApi")
     LocalDate ld = LocalDate.now();
@@ -88,7 +90,6 @@ public class CountryQuestionFragment extends Fragment {
 
         country_list = new ArrayList<>();
         backendData = new BackEnd(getActivity());
-        continents = new ArrayList<String[]>();
 
         backendData.open();
 
@@ -112,37 +113,25 @@ public class CountryQuestionFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Country> countries) {
             country_list.addAll(countries);
-            GenerateQuestion[] Questions = new GenerateQuestion[7];
-            for (int i = 0; i < 6; i++) {
-                Questions[i] = new GenerateQuestion(country_list.get(i));
-                Log.d("QUESTIONS-ARRAY:", "QUESTION ARRAY: "+ Questions[i].q +" "+Questions[i].cA);
-            }
-
             Random random = new Random();
+            int randomIndex = random.nextInt(country_list.size());
+            Country correctCountry = country_list.get(randomIndex);
+            String continent = correctCountry.continent;
+            correctAnswers[versionNum] = continent;
+            String[] incorrectContinents = new String[2];
+            do {
+                incorrectContinents[0] = continents[random.nextInt(continents.length)];
+            } while (incorrectContinents[0].equals(continent));
+            do {
+                incorrectContinents[1] = continents[random.nextInt(continents.length)];
+            } while (incorrectContinents[1].equals(incorrectContinents[0]) || incorrectContinents[1].equals(continent));
 
-            for (int i = 0; i < 6; i++) {
-                String a = Questions[i].cA;
-                String[] b = new String[2];
-                for (int j = 0; j < 2; j++) {
-                    int randomIndex;
-                    String continent;
-                    do {
-                        randomIndex = random.nextInt(country_list.size());
-                        continent = country_list.get(randomIndex).continent;
-                    } while (randomIndex == i || continent.equals(b[0])); // Ensure random index is different from current country index and continent is different from previous one
-                    b[j] = continent;
-                }
-                Log.d("QUESTIONS-ARRAY:", "B: " + Arrays.toString(b));
-                continents.add(b);
-            }
-            //Log.d("QUESTIONS-ARRAY:", "continent ARRAY: "+ Arrays.toString(continents.get(1)));
+            Log.d("country", correctCountry.name);
+            Log.d("correct", continent);
+            Log.d("ic[0]", incorrectContinents[0]);
+            Log.d("ic[1]", incorrectContinents[1]);
 
-
-            GenerateQuestion[] gq = new GenerateQuestion[7];
-            for(int i = 0; i < 6; i++){
-                gq[i] = new GenerateQuestion(Questions[i].q, continents.get(i), Questions[i].cA);
-                //Log.d("QUESTIONS-ARRAY:", "gq: " + gq[i].q2);
-            }
+            GenerateQuestion question = new GenerateQuestion(correctCountry.name, incorrectContinents, continent);
 
             View fragmentView = getView();
             if (fragmentView != null) {
@@ -152,10 +141,10 @@ public class CountryQuestionFragment extends Fragment {
                 RadioButton r3 = fragmentView.findViewById(R.id.radioButton3);
 
                 //Log.d("TITLE-VIEW", gq[versionNum].q);
-                titleView.setText(gq[versionNum].q2);
-                r1.setText(gq[versionNum].a1);
-                r2.setText(gq[versionNum].a2);
-                r3.setText(gq[versionNum].a3);
+                titleView.setText(question.q2);
+                r1.setText(question.a1);
+                r2.setText(question.a2);
+                r3.setText(question.a3);
 
                 RadioGroup rg = fragmentView.findViewById(R.id.radioGroup);
                 rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -164,11 +153,7 @@ public class CountryQuestionFragment extends Fragment {
                         RadioButton radioButton = fragmentView.findViewById(checkedId);
                         if (radioButton != null && radioButton.isChecked()) {
                             String selectedText = radioButton.getText().toString();
-                            if (selectedText.equals(gq[versionNum].ccc)) {
-                                score+=2;
-                            }else{
-                                score+=1;
-                            }
+                            selectedAnswers[versionNum] = selectedText;
                         }
                     }
                 });

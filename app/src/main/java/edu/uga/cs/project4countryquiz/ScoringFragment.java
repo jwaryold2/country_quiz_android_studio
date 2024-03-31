@@ -40,7 +40,13 @@ public class ScoringFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState ) {
         //public void onActivityCreated(Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        TextView scoreText = view.findViewById(R.id.score);
-        scoreText.setText("Score: " + CountryQuestionFragment.getScore());
+        int score = 0;
+        for (int i = 0; i < 6; i++) {
+            if (CountryQuestionFragment.correctAnswers[i].equals(CountryQuestionFragment.selectedAnswers[i])) {
+                score++;
+            }
+        }
+        TextView scoreView = view.findViewById(R.id.score);
+        scoreView.setText("Score: " + score);
     }
 }
