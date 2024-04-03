@@ -33,10 +33,11 @@ import java.util.stream.Collectors;
 public class CountryQuestionFragment extends Fragment {
     private BackEnd backendData = null;
     private List<Country> country_list;
-    private String[] continents = {"Asia", "Europe", "North America", "South America", "Africa", "Oceania"};
+    private final String[] continents = {"Asia", "Europe", "North America", "South America", "Africa", "Oceania"};
     static int score = 0;
     static String[] correctAnswers = new String[6];
     static String[] selectedAnswers = new String[6];
+    static String[] usedCountries = new String[6];
     int listsize;
     @SuppressLint("NewApi")
     LocalDate ld = LocalDate.now();
@@ -114,8 +115,12 @@ public class CountryQuestionFragment extends Fragment {
         protected void onPostExecute(List<Country> countries) {
             country_list.addAll(countries);
             Random random = new Random();
-            int randomIndex = random.nextInt(country_list.size());
-            Country correctCountry = country_list.get(randomIndex);
+            Country correctCountry;
+            do {
+                int randomIndex = random.nextInt(country_list.size());
+                correctCountry = country_list.get(randomIndex);
+            } while (isUsed(correctCountry));
+            usedCountries[versionNum] = correctCountry.name;
             String continent = correctCountry.continent;
             correctAnswers[versionNum] = continent;
             String[] incorrectContinents = new String[2];
@@ -141,10 +146,10 @@ public class CountryQuestionFragment extends Fragment {
                 RadioButton r3 = fragmentView.findViewById(R.id.radioButton3);
 
                 //Log.d("TITLE-VIEW", gq[versionNum].q);
-                titleView.setText(question.q2);
-                r1.setText(question.a1);
-                r2.setText(question.a2);
-                r3.setText(question.a3);
+                titleView.setText("Name the continent on which " + question.q2 + " is located:");
+                r1.setText("a) " + question.a1);
+                r2.setText("b) " + question.a2);
+                r3.setText("c) " + question.a3);
 
                 RadioGroup rg = fragmentView.findViewById(R.id.radioGroup);
                 rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -152,12 +157,32 @@ public class CountryQuestionFragment extends Fragment {
                     public void onCheckedChanged(RadioGroup group, int checkedId) {
                         RadioButton radioButton = fragmentView.findViewById(checkedId);
                         if (radioButton != null && radioButton.isChecked()) {
-                            String selectedText = radioButton.getText().toString();
+                            String selectedText;
+                            if (r1.isChecked()) {
+                                selectedText = question.a1;
+                            } else if (r2.isChecked()) {
+                                selectedText = question.a2;
+                            } else {
+                                selectedText = question.a3;
+                            }
                             selectedAnswers[versionNum] = selectedText;
                         }
                     }
                 });
             }
+        }
+
+        protected boolean isUsed(Country country) {
+            boolean isUsed = false;
+            for (int i = 0; i < versionNum; i++) {
+                Log.d("usedCountries[i]", usedCountries[i]);
+                Log.d("country.name", country.name);
+                if (usedCountries[i].equals(country.name)) {
+                    isUsed = true;
+                    break;
+                }
+            }
+            return isUsed;
         }
     }
 }
