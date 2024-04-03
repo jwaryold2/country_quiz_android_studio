@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.os.Build;
 import android.util.Log;
 import android.view.View;
 
@@ -18,6 +19,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.time.Instant;
 
 public class BackEnd {
     private static final String DB_NAME = "countriesQuiz.db";
@@ -101,4 +103,38 @@ public class BackEnd {
         //Log.d(DEBUG_TAG, "COUNTRIES:"+ Arrays.toString(new ArrayList[]{countries}));
         return countries;
     }
+
+    public void postScore(int r) {
+        try {
+            // Open the database for writing
+            db = Backendhelper.getWritableDatabase();
+
+            // Create ContentValues object to store the values to be inserted
+            ContentValues values = new ContentValues();
+            values.put(BackendHelper.score, r);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                values.put(BackendHelper.time_stamp, Instant.now().toString());
+            }
+
+            // Insert the values into the database
+            long newRowId = db.insert("results", null, values);
+
+            if (newRowId != -1) {
+                // Insertion successful
+                Log.d(DEBUG_TAG, "Score posted successfully!");
+            } else {
+                // Insertion failed
+                Log.d(DEBUG_TAG, "Failed to post score!");
+            }
+        } catch (Exception e) {
+            // Exception occurred
+            Log.d(DEBUG_TAG, "Exception caught while posting score: " + e);
+        } finally {
+            // Close the database connection
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
+        }
+    }
+
 }

@@ -5,10 +5,16 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+
+import java.util.List;
+import java.util.Random;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -16,6 +22,9 @@ import android.widget.TextView;
  * create an instance of this fragment.
  */
 public class ScoringFragment extends Fragment {
+
+    private BackEnd backendData = null;
+    public int score = 0;
 
     public ScoringFragment() {
         // Required empty public constructor
@@ -48,5 +57,21 @@ public class ScoringFragment extends Fragment {
         }
         TextView scoreView = view.findViewById(R.id.score);
         scoreView.setText("Score: " + score);
+        Log.d("Score:", String.valueOf(score));
+        backendData.open();
+
+        new BackendReader().execute();
+    }
+    private class BackendReader extends AsyncTask<Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            backendData.postScore(score);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            Log.d("Added Score: ", String.valueOf(score));
+        }
     }
 }

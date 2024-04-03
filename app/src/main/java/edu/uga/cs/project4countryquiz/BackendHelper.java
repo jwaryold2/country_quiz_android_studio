@@ -22,6 +22,14 @@ public class BackendHelper extends SQLiteOpenHelper {
             " TEXT, "+ COUNTRIES_COLUMN_CONTINENT +" TEXT )";
 
 
+    public static final String result_id = "_id";
+    public static final String time_stamp ="time_stamp";
+    public static final String score = "score";
+
+    private static final String CREATE_RESULTS = "create table results" + " ("+
+            result_id + " INTEGER PRIMARY KEY AUTOINCREMENT, "+time_stamp+
+            " TEXT, "+ score +" INTEGER )";
+
     private BackendHelper ( Context context ) {
         super( context,DB_NAME, null, DB_VERSION );
     }
@@ -39,6 +47,7 @@ public class BackendHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate( SQLiteDatabase db ) {
         db.execSQL( CREATE_COUNTRIES );
+        db.execSQL( CREATE_RESULTS );
         Log.d( "backend", "Table " + TABLE_COUNTRIES + " created" );
     }
 
