@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 import java.util.Random;
@@ -24,7 +25,6 @@ import java.util.Random;
 public class ScoringFragment extends Fragment {
 
     private BackEnd backendData = null;
-    public int score = 0;
 
     public ScoringFragment() {
         // Required empty public constructor
@@ -58,20 +58,23 @@ public class ScoringFragment extends Fragment {
         TextView scoreView = view.findViewById(R.id.score);
         scoreView.setText("Score: " + score);
         Log.d("Score:", String.valueOf(score));
+        backendData = new BackEnd(getActivity());
         backendData.open();
 
-        new BackendReader().execute();
+        new BackendWriter().execute(score);
     }
-    private class BackendReader extends AsyncTask<Void, Void> {
+    private class BackendWriter extends AsyncTask<Integer, Integer> {
+
         @Override
-        protected Void doInBackground(Void... params) {
-            backendData.postScore(score);
-            return null;
+        protected Integer doInBackground(Integer ... arguments) {
+                backendData.postScore(arguments[0]);
+            return arguments[0];
         }
 
         @Override
-        protected void onPostExecute(Void unused) {
-            Log.d("Added Score: ", String.valueOf(score));
+        protected void onPostExecute(Integer integer) {
+            Toast.makeText( getActivity(), "Score Posted: "+ integer,
+                    Toast.LENGTH_SHORT).show();
         }
     }
 }

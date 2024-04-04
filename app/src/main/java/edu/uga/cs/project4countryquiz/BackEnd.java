@@ -111,12 +111,12 @@ public class BackEnd {
 
             // Create ContentValues object to store the values to be inserted
             ContentValues values = new ContentValues();
-            values.put(BackendHelper.score, r);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 values.put(BackendHelper.time_stamp, Instant.now().toString());
             }
+            values.put(BackendHelper.score, r);
 
-            // Insert the values into the database
+            // Insert the values pinto the database
             long newRowId = db.insert("results", null, values);
 
             if (newRowId != -1) {

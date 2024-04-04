@@ -25,8 +25,9 @@ public class BackendHelper extends SQLiteOpenHelper {
     public static final String result_id = "_id";
     public static final String time_stamp ="time_stamp";
     public static final String score = "score";
+    public static final String TABLE_NAME1= "results";
 
-    private static final String CREATE_RESULTS = "create table results" + " ("+
+    private static final String CREATE_RESULTS = "create table " + "results" + " ("+
             result_id + " INTEGER PRIMARY KEY AUTOINCREMENT, "+time_stamp+
             " TEXT, "+ score +" INTEGER )";
 
@@ -46,9 +47,10 @@ public class BackendHelper extends SQLiteOpenHelper {
     //Override onCreate which will create db if not exist
     @Override
     public void onCreate( SQLiteDatabase db ) {
+        db.execSQL("create table "+TABLE_NAME1+" (ID INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT, score INTEGER)");
         db.execSQL( CREATE_COUNTRIES );
-        db.execSQL( CREATE_RESULTS );
         Log.d( "backend", "Table " + TABLE_COUNTRIES + " created" );
+        Log.d("backend", "Table results created");
     }
 
     @Override
