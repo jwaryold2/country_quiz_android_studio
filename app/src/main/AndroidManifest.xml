@@ -13,6 +13,12 @@
         android:theme="@style/Theme.Project4countryquiz"
         tools:targetApi="31">
         <activity
+            android:name=".ResultsRecycleAdapter"
+            android:exported="false" />
+        <activity
+            android:name=".ResultsRecyclerAdapter"
+            android:exported="false" />
+        <activity
             android:name=".scoreActivity"
             android:exported="false" />
         <activity

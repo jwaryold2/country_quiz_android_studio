@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -104,6 +105,7 @@ public class BackEnd {
         return countries;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void postScore(int r) {
         try {
             // Open the database for writing
@@ -111,9 +113,7 @@ public class BackEnd {
 
             // Create ContentValues object to store the values to be inserted
             ContentValues values = new ContentValues();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                values.put(BackendHelper.time_stamp, Instant.now().toString());
-            }
+            values.put(BackendHelper.time_stamp, Instant.now().toString());
             values.put(BackendHelper.score, r);
 
             // Insert the values pinto the database
@@ -137,4 +137,47 @@ public class BackEnd {
         }
     }
 
+
+    public List<String> retrieveAllResults() {
+        ArrayList<String> countries = new ArrayList<>();
+        Cursor cursor = null;
+        int columnIndex;
+        try{
+            cursor = db.query( BackendHelper.TABLE_NAME1, allColumns, null, null,null,null,null);
+
+            if( cursor!=null && cursor.getCount() > 0) {
+
+                while( cursor.moveToNext() ) {
+
+                    if( cursor.getColumnCount() >= 0){
+
+                        //get all attribute values of country
+                        columnIndex = cursor.getColumnIndex( BackendHelper.score );
+                        String country = cursor.getString(columnIndex);
+                        columnIndex = cursor.getColumnIndex( BackendHelper.time_stamp );
+                        String continent  = cursor.getString(columnIndex);
+                        String dbc = country +" "+ continent;
+                        countries.add(dbc);
+                        // Log.d(DEBUG_TAG, "Retrieved Country: " + dbc);
+                    }//if
+
+                }//while
+
+            }//if
+            if( cursor != null )
+                Log.d( DEBUG_TAG, "Number of records from DB: " + cursor.getCount() );
+            else
+                Log.d( DEBUG_TAG, "Number of records from DB: 0" );
+        } //try
+        catch( Exception e){
+            Log.d( DEBUG_TAG, "EXCEPTION CAUGHT: "+e);
+        }
+        finally{
+            if(cursor!=null){
+                cursor.close();
+            }
+        }
+        //Log.d(DEBUG_TAG, "COUNTRIES:"+ Arrays.toString(new ArrayList[]{countries}));
+        return countries;
+    }
 }
