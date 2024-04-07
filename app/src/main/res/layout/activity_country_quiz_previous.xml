@@ -8,10 +8,23 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/previousQuizResults"
-        android:layout_width="377dp"
-        android:layout_height="701dp"
+        android:layout_width="379dp"
+        android:layout_height="641dp"
         android:foregroundGravity="center_horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.529"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="277dp"
+        android:layout_height="19dp"
+        android:text="Previous Results:"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/previousQuizResults"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

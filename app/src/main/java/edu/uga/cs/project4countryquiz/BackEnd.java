@@ -37,6 +37,10 @@ public class BackEnd {
             BackendHelper.COUNTRIES_COLUMN_COUNTRY,
             BackendHelper.COUNTRIES_COLUMN_CONTINENT
     };
+    private static final String[] allColumns2 = {
+            BackendHelper.time_stamp,
+            BackendHelper.score
+    };
 
     public BackEnd(Context context) {
         this.Backendhelper = BackendHelper.getInstance( context );
@@ -143,7 +147,7 @@ public class BackEnd {
         Cursor cursor = null;
         int columnIndex;
         try{
-            cursor = db.query( BackendHelper.TABLE_NAME1, allColumns, null, null,null,null,null);
+            cursor = db.query( BackendHelper.TABLE_NAME1, allColumns2, null, null,null,null,null);
 
             if( cursor!=null && cursor.getCount() > 0) {
 
@@ -151,14 +155,14 @@ public class BackEnd {
 
                     if( cursor.getColumnCount() >= 0){
 
+                        columnIndex = cursor.getColumnIndex( BackendHelper.time_stamp );
+                        String continent  = cursor.getString(columnIndex);
                         //get all attribute values of country
                         columnIndex = cursor.getColumnIndex( BackendHelper.score );
                         String country = cursor.getString(columnIndex);
-                        columnIndex = cursor.getColumnIndex( BackendHelper.time_stamp );
-                        String continent  = cursor.getString(columnIndex);
                         String dbc = country +" "+ continent;
                         countries.add(dbc);
-                        // Log.d(DEBUG_TAG, "Retrieved Country: " + dbc);
+                        Log.d(DEBUG_TAG, "Retrieved Country: " + dbc);
                     }//if
 
                 }//while
