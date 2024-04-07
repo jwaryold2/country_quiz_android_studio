@@ -1,5 +1,6 @@
 package edu.uga.cs.project4countryquiz;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -58,6 +60,16 @@ public class ScoringFragment extends Fragment {
         TextView scoreView = view.findViewById(R.id.score);
         scoreView.setText("Score: " + score);
         Log.d("Score:", String.valueOf(score));
+        Button returnButton = view.findViewById(R.id.returnButton);
+
+        Intent i = new Intent(this.getContext(), MainActivity.class);
+
+        returnButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivity(i);
+            }
+        });
+
         backendData = new BackEnd(getActivity());
         backendData.open();
 

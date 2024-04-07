@@ -34,6 +34,9 @@ public class CountryQuestionFragment extends Fragment {
     private BackEnd backendData = null;
     private List<Country> country_list;
     private final String[] continents = {"Asia", "Europe", "North America", "South America", "Africa", "Oceania"};
+    private String continent;
+    private String countryName;
+    private String[] answers = new String[3];
     static int score = 0;
     static String[] correctAnswers = new String[6];
     static String[] selectedAnswers = new String[6];
@@ -94,6 +97,12 @@ public class CountryQuestionFragment extends Fragment {
 
         backendData.open();
 
+        if (savedInstanceState != null) {
+            countryName = savedInstanceState.getString("currentCountry", null);
+            continent = savedInstanceState.getString("currentContinent", null);
+            answers = savedInstanceState.getStringArray("currentAnswers");
+        }
+
         new BackendReader().execute();
     }
 
@@ -116,27 +125,28 @@ public class CountryQuestionFragment extends Fragment {
             country_list.addAll(countries);
             Random random = new Random();
             Country correctCountry;
-            do {
-                int randomIndex = random.nextInt(country_list.size());
-                correctCountry = country_list.get(randomIndex);
-            } while (isUsed(correctCountry));
-            usedCountries[versionNum] = correctCountry.name;
-            String continent = correctCountry.continent;
-            correctAnswers[versionNum] = continent;
-            String[] incorrectContinents = new String[2];
-            do {
-                incorrectContinents[0] = continents[random.nextInt(continents.length)];
-            } while (incorrectContinents[0].equals(continent));
-            do {
-                incorrectContinents[1] = continents[random.nextInt(continents.length)];
-            } while (incorrectContinents[1].equals(incorrectContinents[0]) || incorrectContinents[1].equals(continent));
+            if (continent == null) {
+                do {
+                    int randomIndex = random.nextInt(country_list.size());
+                    correctCountry = country_list.get(randomIndex);
+                } while (isUsed(correctCountry));
+                usedCountries[versionNum] = correctCountry.name;
+                continent = correctCountry.continent;
+                correctAnswers[versionNum] = continent;
+                String[] incorrectContinents = new String[2];
+                do {
+                    incorrectContinents[0] = continents[random.nextInt(continents.length)];
+                } while (incorrectContinents[0].equals(continent));
+                do {
+                    incorrectContinents[1] = continents[random.nextInt(continents.length)];
+                } while (incorrectContinents[1].equals(incorrectContinents[0]) || incorrectContinents[1].equals(continent));
 
-            Log.d("country", correctCountry.name);
-            Log.d("correct", continent);
-            Log.d("ic[0]", incorrectContinents[0]);
-            Log.d("ic[1]", incorrectContinents[1]);
-
-            GenerateQuestion question = new GenerateQuestion(correctCountry.name, incorrectContinents, continent);
+                GenerateQuestion question = new GenerateQuestion(correctCountry.name, incorrectContinents, continent);
+                answers[0] = question.a1;
+                answers[1] = question.a2;
+                answers[2] = question.a3;
+                countryName = question.q2;
+            }
 
             View fragmentView = getView();
             if (fragmentView != null) {
@@ -146,10 +156,10 @@ public class CountryQuestionFragment extends Fragment {
                 RadioButton r3 = fragmentView.findViewById(R.id.radioButton3);
 
                 //Log.d("TITLE-VIEW", gq[versionNum].q);
-                titleView.setText("Name the continent on which " + question.q2 + " is located:");
-                r1.setText("a) " + question.a1);
-                r2.setText("b) " + question.a2);
-                r3.setText("c) " + question.a3);
+                titleView.setText("Name the continent on which " + countryName + " is located:");
+                r1.setText("a) " + answers[0]);
+                r2.setText("b) " + answers[1]);
+                r3.setText("c) " + answers[2]);
 
                 RadioGroup rg = fragmentView.findViewById(R.id.radioGroup);
                 rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -159,11 +169,11 @@ public class CountryQuestionFragment extends Fragment {
                         if (radioButton != null && radioButton.isChecked()) {
                             String selectedText;
                             if (r1.isChecked()) {
-                                selectedText = question.a1;
+                                selectedText = answers[0];
                             } else if (r2.isChecked()) {
-                                selectedText = question.a2;
+                                selectedText = answers[1];
                             } else {
-                                selectedText = question.a3;
+                                selectedText = answers[2];
                             }
                             selectedAnswers[versionNum] = selectedText;
                         }
@@ -184,5 +194,13 @@ public class CountryQuestionFragment extends Fragment {
             }
             return isUsed;
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("currentCountry", countryName);
+        outState.putString("currentContinent", continent);
+        outState.putStringArray("currentAnswers", answers);
     }
 }
