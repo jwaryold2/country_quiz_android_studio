@@ -4,6 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Random;
+
+/**
+ * Class to represent a question on the quiz
+ */
 public class GenerateQuestion {
     //section for second question creation
     String q2;
@@ -15,21 +19,13 @@ public class GenerateQuestion {
     //Section for initial question creation
     String q;
     String cA;
-    int score;
-    LocalTime lt;
-    LocalDate ld;
 
-    public GenerateQuestion(){
-
-    }
-
-    public GenerateQuestion(Country c) {
-        this.q = c.name;
-        this.cA = c.continent;
-    }
-
-
-    //generate Score page
+    /**
+     * Constructor
+     * @param country the country being quizzed
+     * @param randAnswers array of the two incorrect continent choices
+     * @param correct the correct continent
+     */
     public GenerateQuestion(String country,  String [] randAnswers, String correct)
     {
         String[] aaa = new String[3];
@@ -43,6 +39,11 @@ public class GenerateQuestion {
         this.a2 = aaa[1];
         this.a3 = aaa[2];
     }
+
+    /**
+     * Create a string representation of the country, mainly for debugging purposes
+     * @return string representation of the country name and continent
+     */
     @Override
     public String toString() {
         return "Country{" +
@@ -50,6 +51,11 @@ public class GenerateQuestion {
                 ", continent='" + cA + '\'' +
                 '}';
     }
+
+    /**
+     * Shuffles an array, in this case presents the correct answer always being the same answer choice
+     * @param array array to shuffle
+     */
     public static void shuffleArray(String[] array) {
         Random random = new Random();
         for (int i = array.length - 1; i > 0; i--) {

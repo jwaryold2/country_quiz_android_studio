@@ -19,6 +19,6 @@ public class CountryQuizPagerAdapter extends FragmentStateAdapter {
     }
     @Override
     public int getItemCount() {
-        return CountryQuestionFragment.getNumberOfVersions() + 1;
+        return CountryQuestionFragment.getNumberOfQuestions() + 1;
     }
 }

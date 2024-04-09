@@ -7,7 +7,9 @@ import android.os.Handler;
 import android.os.Looper;
 
 
-/** This is a replacement class for the Android's  AsyncTask class.
+/**
+ * Code and comments borrowed from https://github.com/mobdevuga/jobstrackersqlite/blob/master/app/src/main/java/edu/uga/cs/jobstrackersqlite/AsyncTask.java
+ * This is a replacement class for the Android's  AsyncTask class.
  * However, handling of the task's progress has not been implemented.
  * It uses Java's standard concurrency framework.
  * @param <Param> type of the input parameter for doInBackground

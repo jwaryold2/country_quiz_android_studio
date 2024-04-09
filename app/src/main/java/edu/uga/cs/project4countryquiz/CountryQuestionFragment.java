@@ -29,7 +29,9 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
+/**
+ * Fragment to store the UI for each quiz question
+ */
 public class CountryQuestionFragment extends Fragment {
     private BackEnd backendData = null;
     private List<Country> country_list;
@@ -46,36 +48,54 @@ public class CountryQuestionFragment extends Fragment {
     LocalDate ld = LocalDate.now();
     @SuppressLint("NewApi")
     LocalTime lt = LocalTime.now();
-    // Array of Android version code names
 
     public static final GenerateQuestion [] sixQuestions = new GenerateQuestion[7];
-    // Array of Android version highlights/brief descriptions
 
-
-
-    // which Android version to display in the fragment
-    private int versionNum;
+    // which quiz question to display in the fragment
+    private int questionNum;
 
     public CountryQuestionFragment() {
         // Required empty public constructor
     }
 
-    public static CountryQuestionFragment newInstance( int versionNum ) {
+    /**
+     * Creates a new instance of the fragment
+     * @param questionNum the current quiz question
+     * @return a new instance of the fragment
+     */
+    public static CountryQuestionFragment newInstance( int questionNum ) {
         CountryQuestionFragment fragment = new CountryQuestionFragment();
         Bundle args = new Bundle();
-        args.putInt( "versionNum", versionNum );
+        args.putInt( "questionNum", questionNum );
         fragment.setArguments( args );
         return fragment;
     }
 
+    /**
+     * When fragment is created, save questionNum
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     */
     @Override
     public void onCreate( Bundle savedInstanceState ) {
         super.onCreate( savedInstanceState );
         if( getArguments() != null ) {
-            versionNum = getArguments().getInt( "versionNum" );
+            questionNum = getArguments().getInt( "questionNum" );
         }
     }
 
+    /**
+     * As view is created, create UI by inflating the XML
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return the inflated view
+     */
     @Override
     public View onCreateView( LayoutInflater inflater, ViewGroup container,
                               Bundle savedInstanceState ) {
@@ -83,14 +103,15 @@ public class CountryQuestionFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_country_question, container, false );
     }
 
+    /**
+     * Once view is created, save the current country, continent, and answers if they exist yet, then execute BackendReader()
+     * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     */
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        TextView titleView = view.findViewById(R.id.textView2);
-        RadioGroup rg = view.findViewById(R.id.radioGroup);
-        RadioButton r1 = view.findViewById(R.id.radioButton);
-        RadioButton r2 = view.findViewById(R.id.radioButton2);
-        RadioButton r3 = view.findViewById(R.id.radioButton3);
 
         country_list = new ArrayList<>();
         backendData = new BackEnd(getActivity());
@@ -106,33 +127,47 @@ public class CountryQuestionFragment extends Fragment {
         new BackendReader().execute();
     }
 
-    public static int getScore() {
-        return score;
-    }
-
-    public static int getNumberOfVersions() {
+    /**
+     * Get the number of questions in the quiz (should always be 6)
+     * @return number of questions
+     */
+    public static int getNumberOfQuestions() {
         return sixQuestions.length;
     }
 
+    /**
+     * Class to asynchronously retrieve all the countries and then generate the quiz from them
+     */
     private class BackendReader extends AsyncTask<Void, List<Country>> {
+        /**
+         * Asynchronously retrieve all the countries
+         * @param params params
+         * @return a list of the countries retrieved
+         */
         @Override
         protected List<Country> doInBackground(Void... params) {
             return backendData.retrieveAllCountries();
         }
 
+        /**
+         * After the countries have been retrieved, generate the quiz
+         * @param countries list of the countries retrieved
+         */
         @Override
         protected void onPostExecute(List<Country> countries) {
             country_list.addAll(countries);
             Random random = new Random();
             Country correctCountry;
+
+            // if continent has not been chosen, choose a random continent and create the current quiz question from that
             if (continent == null) {
                 do {
                     int randomIndex = random.nextInt(country_list.size());
                     correctCountry = country_list.get(randomIndex);
                 } while (isUsed(correctCountry));
-                usedCountries[versionNum] = correctCountry.name;
+                usedCountries[questionNum] = correctCountry.name;
                 continent = correctCountry.continent;
-                correctAnswers[versionNum] = continent;
+                correctAnswers[questionNum] = continent;
                 String[] incorrectContinents = new String[2];
                 do {
                     incorrectContinents[0] = continents[random.nextInt(continents.length)];
@@ -163,6 +198,11 @@ public class CountryQuestionFragment extends Fragment {
 
                 RadioGroup rg = fragmentView.findViewById(R.id.radioGroup);
                 rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                    /**
+                     * When a new country is selected, add the selected country to selectedAnswers[]
+                     * @param group the group in which the checked radio button has changed
+                     * @param checkedId the unique identifier of the newly checked radio button
+                     */
                     @Override
                     public void onCheckedChanged(RadioGroup group, int checkedId) {
                         RadioButton radioButton = fragmentView.findViewById(checkedId);
@@ -175,16 +215,21 @@ public class CountryQuestionFragment extends Fragment {
                             } else {
                                 selectedText = answers[2];
                             }
-                            selectedAnswers[versionNum] = selectedText;
+                            selectedAnswers[questionNum] = selectedText;
                         }
                     }
                 });
             }
         }
 
+        /**
+         * Helper method to ensure the same country can't be used more than once in a single quiz
+         * @param country the country to check if it has been used yet
+         * @return true if the country has been used in the quiz, false otherwise
+         */
         protected boolean isUsed(Country country) {
             boolean isUsed = false;
-            for (int i = 0; i < versionNum; i++) {
+            for (int i = 0; i < questionNum; i++) {
                 Log.d("usedCountries[i]", usedCountries[i]);
                 Log.d("country.name", country.name);
                 if (usedCountries[i].equals(country.name)) {
@@ -196,6 +241,10 @@ public class CountryQuestionFragment extends Fragment {
         }
     }
 
+    /**
+     * Save necessary information about the current quiz question should the user rotate the screen
+     * @param outState Bundle in which to place your saved state.
+     */
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
